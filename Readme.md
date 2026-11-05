@@ -2,6 +2,11 @@
 
 A zero-install browser bookmarklet for Chrome, Firefox, Safari, and iPadOS that converts [Technion WeBWorK](https://webwork.technion.ac.il/) homework sets into clean, printable PDF worksheets for offline practice and tablet note-taking.
 
+| Before (Hardcopy PDF Blocked) | After (Clean Printable Worksheet) |
+| :---: | :---: |
+| ![Before - Hardcopy PDF Blocked](before.png) | ![After - Generated Printable Worksheet](after.png) |
+
+
 ## Table of Contents
 
 - [Key Features](#key-features)
