@@ -4,7 +4,7 @@ A zero-install browser bookmarklet for Chrome, Firefox, Safari, and iPadOS that 
 
 | Before (Hardcopy PDF Blocked) | After (Clean Printable Worksheet) |
 | :---: | :---: |
-| ![Before - Hardcopy PDF Blocked](before.png) | ![After - Generated Printable Worksheet](after.png) |
+| <img src="before.png" alt="Before - Hardcopy PDF Blocked" height="300"> | <img src="after.png" alt="After - Generated Printable Worksheet" height="300"> |
 
 
 ## Table of Contents
