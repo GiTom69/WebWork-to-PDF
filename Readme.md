@@ -23,7 +23,7 @@ A zero-install browser bookmarklet for Chrome, Firefox, Safari, and iPadOS that 
 
 - **One-Click Set Assembly:** Automatically fetches and merges all problems from a homework set or problem page in parallel.
 - **Paper- & Stylus-Friendly:** Replaces text fields and dropdowns with write-in lines, and choice inputs with printable ballot boxes (`☐`).
-- **Pre-Print Controls:** Toggle blank answer boxes for clean re-attempts, or append scratchpad areas for derivations.
+- **Pre-Print Controls:** Toggle blank answer boxes for clean re-attempts, append compact scratchpad areas, or enable **1 problem per page** mode (placing each problem on its own full PDF page with a scratchpad stretching all the way to the bottom).
 - **Bilingual Support:** Handles mixed Hebrew text (RTL) and mathematical formulas (LTR) with proper alignment.
 - **Zero Dependencies:** Pure JavaScript bookmarklet requiring no extensions, CLI tools, or external installs.
 
@@ -44,7 +44,7 @@ A zero-install browser bookmarklet for Chrome, Firefox, Safari, and iPadOS that 
 1. Log in to WeBWorK via Moodle and open your homework set (or any problem page).
 2. Click the **WeBWorK to PDF** bookmark.
 3. Wait 1–2 seconds for problems to load.
-4. *(Optional)* Toggle **Blank answer boxes** or **Add scratchpad space**.
+4. *(Optional)* Toggle **Blank answer boxes**, **Add scratchpad space**, or **1 problem per page**.
 5. Click **Print / Save PDF** (destination: **Save as PDF**).
 6. Click **Back to WeBWorK** when finished.
 

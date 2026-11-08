@@ -91,6 +91,7 @@
   var style = document.createElement('style');
   style.id = 'ww-pdf-style';
   style.textContent = [
+    '@page { size: A4 portrait; margin: 8mm; }',
     '.ww-pdf-hidden-orig { display: none !important; }',
     '.ww-pdf-root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: rgb(20, 24, 31); background: rgb(248, 250, 252); min-height: 100vh; padding: 0 0 48px 0; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
     '.ww-pdf-toolbar { position: sticky; top: 0; z-index: 99999; background: rgb(15, 23, 42); color: white; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); direction: ltr; }',
@@ -105,13 +106,17 @@
     '.ww-pdf-header h1 { font-size: 20px; margin: 0; color: rgb(15, 23, 42); }',
     '.ww-pdf-header span { font-size: 13px; color: rgb(100, 116, 139); }',
     '.ww-pdf-card { background: white; border: 1px solid rgb(203, 213, 225); border-radius: 8px; padding: 18px 22px; margin-bottom: 18px; -webkit-column-break-inside: avoid; break-inside: avoid; page-break-inside: avoid; display: block; }',
-    '.ww-pdf-card-head { font-weight: 700; font-size: 14px; color: rgb(30, 41, 59); border-bottom: 1px solid rgb(226, 232, 240); padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; direction: ltr; }',
+    '.ww-pdf-card-head { font-weight: 700; font-size: 14px; color: rgb(30, 41, 59); border-bottom: 1px solid rgb(226, 232, 240); padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; direction: ltr; }',
+    '.ww-pdf-card-set { font-weight: 400; font-size: 12px; color: rgb(100, 116, 139); }',
     '.ww-pdf-body { font-size: 14px; line-height: 1.6; overflow-x: visible; }',
     '.ww-pdf-body img { max-width: 520px; height: auto; display: block; margin: 10px 0; }',
     '.ww-ans-box { display: inline-block; min-width: 120px; min-height: 24px; padding: 2px 8px; margin: 2px 4px; border: 1.5px solid rgb(71, 85, 105); border-radius: 4px; background: rgb(248, 250, 252); vertical-align: middle; font-family: ui-monospace, monospace; font-size: 13px; direction: ltr; text-align: left; }',
     '.ww-hide-saved .ww-ans-text { visibility: hidden; }',
     '.ww-scratchpad { display: none; margin-top: 14px; height: 110px; border: 1px dashed rgb(148, 163, 184); border-radius: 6px; padding: 6px 10px; font-size: 11px; color: rgb(148, 163, 184); direction: ltr; }',
     '.ww-show-scratch .ww-scratchpad { display: block; }',
+    '.ww-one-per-page .ww-pdf-card { display: flex; flex-direction: column; box-sizing: border-box; width: auto; height: auto; min-height: 0; aspect-ratio: 100 / 140; }',
+    '.ww-one-per-page .ww-pdf-card-head, .ww-one-per-page .ww-pdf-body { flex: 0 0 auto; }',
+    '.ww-one-per-page .ww-scratchpad { display: block; flex: 1 1 auto; height: auto; min-height: 160px; }',
     '.MathJax, .MathJax_Display, .MathJax_CHTML, .MathJax_SVG, mjx-container, .ww-tex-wrap { direction: ltr !important; unicode-bidi: isolate; }',
     '@media print {',
     '  html, body { background: white !important; display: block !important; height: auto !important; overflow: visible !important; position: static !important; margin: 0 !important; padding: 0 !important; }',
@@ -119,6 +124,10 @@
     '  .ww-pdf-root { background: white !important; padding: 0 !important; min-height: 0 !important; display: block !important; }',
     '  .ww-pdf-sheet { max-width: none !important; margin: 0 !important; padding: 0 !important; display: block !important; }',
     '  .ww-pdf-card { border: 1px solid rgb(180, 190, 200) !important; box-shadow: none !important; margin-bottom: 14px !important; -webkit-column-break-inside: avoid !important; break-inside: avoid !important; page-break-inside: avoid !important; }',
+    '  .ww-one-per-page .ww-pdf-header { display: none !important; }',
+    '  .ww-one-per-page .ww-pdf-card { display: flex !important; flex-direction: column !important; box-sizing: border-box !important; width: auto !important; height: auto !important; min-height: 0 !important; aspect-ratio: 100 / 140 !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; }',
+    '  .ww-one-per-page .ww-pdf-card:last-child { page-break-after: auto !important; break-after: auto !important; }',
+    '  .ww-one-per-page .ww-scratchpad { display: block !important; flex: 1 1 auto !important; height: auto !important; min-height: 160px !important; }',
     '}'
   ].join(' ');
   document.head.appendChild(style);
@@ -142,6 +151,7 @@
     '  <div class="ww-pdf-controls">',
     '    <label><input type="checkbox" id="ww-chk-blank" checked> Blank answer boxes</label>',
     '    <label><input type="checkbox" id="ww-chk-scratch"> Add scratchpad space</label>',
+    '    <label><input type="checkbox" id="ww-chk-onepage"> 1 problem per page</label>',
     '    <button class="ww-pdf-btn ww-pdf-btn-primary" id="ww-btn-print">Print / Save PDF</button>',
     '    <button class="ww-pdf-btn ww-pdf-btn-secondary" id="ww-btn-close">Back to WeBWorK</button>',
     '  </div>',
@@ -156,11 +166,26 @@
   ].join('');
   document.body.appendChild(root);
 
-  document.getElementById('ww-chk-blank').addEventListener('change', function (e) {
+  var blankChk = document.getElementById('ww-chk-blank');
+  var scratchChk = document.getElementById('ww-chk-scratch');
+  var onePageChk = document.getElementById('ww-chk-onepage');
+
+  blankChk.addEventListener('change', function (e) {
     root.classList.toggle('ww-hide-saved', e.target.checked);
   });
-  document.getElementById('ww-chk-scratch').addEventListener('change', function (e) {
+  scratchChk.addEventListener('change', function (e) {
     root.classList.toggle('ww-show-scratch', e.target.checked);
+    if (!e.target.checked && onePageChk.checked) {
+      onePageChk.checked = false;
+      root.classList.remove('ww-one-per-page');
+    }
+  });
+  onePageChk.addEventListener('change', function (e) {
+    root.classList.toggle('ww-one-per-page', e.target.checked);
+    if (e.target.checked && !scratchChk.checked) {
+      scratchChk.checked = true;
+      root.classList.add('ww-show-scratch');
+    }
   });
   document.getElementById('ww-btn-print').addEventListener('click', function () {
     window.print();
@@ -390,7 +415,7 @@
 
       var head = document.createElement('div');
       head.className = 'ww-pdf-card-head';
-      head.innerHTML = '<span>Problem ' + item.num + '</span><span></span>';
+      head.innerHTML = '<span>Problem ' + item.num + '</span><span class="ww-pdf-card-set">' + setTitle + '</span>';
       card.appendChild(head);
 
       var body = document.createElement('div');
