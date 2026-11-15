@@ -82,6 +82,11 @@
     if (document.querySelector('.problem-content, .problem-main-form, [id="problem_body"]')) {
       links = [{ num: parseInt(last, 10) || 1, url: window.location.href }];
     } else {
+      var wwFrame = document.querySelector('iframe[src*="webwork"], iframe[src*="/webwork2/"]');
+      if (wwFrame && wwFrame.src) {
+        window.location.href = wwFrame.src;
+        return;
+      }
       alert('WeBWorK PDF Exporter: Please open a Homework Set page or Problem page on webwork.technion.ac.il first.');
       return;
     }
