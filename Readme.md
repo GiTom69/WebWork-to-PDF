@@ -1,85 +1,75 @@
-# Technion WeBWorK to Offline PDF Bookmarklet
+# Technion WeBWorK to PDF Bookmarklet
 
-A zero-install browser bookmarklet for Chrome, Firefox, Safari, and iPadOS that converts [Technion WeBWorK](https://webwork.technion.ac.il/) homework sets into clean, printable PDF worksheets for offline practice and tablet note-taking.
+A client-side bookmarklet that compiles an entire Technion WeBWorK homework set into a single, formatted, printable practice worksheet (PDF). 
 
-| Before (Hardcopy PDF Blocked) | After (Clean Printable Worksheet) |
-| :---: | :---: |
-| <img src="before.png" alt="Before - Hardcopy PDF Blocked" height="300"> | <img src="after.png" alt="After - Generated Printable Worksheet" height="300"> |
+Supports bilingual (Hebrew/English) courses, dynamic MathJax rendering, and multi-page print layouts across Chrome, Firefox, and Safari on PC and tablets.
 
+---
 
-## Table of Contents
+## Features
 
-- [Key Features](#key-features)
-- [Setup](#setup)
-- [How to Use](#how-to-use)
-  - [Desktop](#desktop)
-  - [Mobile & iPad (GoodNotes / Notability)](#mobile--ipad-goodnotes--notability)
-- [Background & Motivation](#background--motivation)
-- [How It Works Under the Hood](#how-it-works-under-the-hood)
-- [Troubleshooting](#troubleshooting)
-- [Customization](#customization)
+- **Full Set Compilation**: Automatically fetches and merges all problems from the active homework set in parallel while reusing your existing Moodle LTI / WeBWorK session.
+- **Run from Anywhere**: Launch the bookmarklet from either the **Homework Set Overview** page or any **individual Problem** page.
+- **Interactive-to-Paper Conversion**: Replaces text inputs, dropdown menus, and radio/checkbox inputs with clean write-in answer boxes and printable ballot symbols (`☐`).
+- **Pre-Print Controls**:
+  - **Blank answer boxes**: Hides previously saved answers for a clean practice sheet.
+  - **Add scratchpad space**: Appends a dedicated lined/dashed work area below each problem.
+  - **1 problem per page**: Expands each problem and its scratchpad to fill a full A4 page (`break-after: page`).
+- **Bilingual & MathJax Support**: Preserves right-to-left (RTL) Hebrew text alongside left-to-right (LTR) LaTeX equations, supporting both MathJax v2 and v3.
 
-## Key Features
+---
 
-- **One-Click Set Assembly:** Automatically fetches and merges all problems from a homework set or problem page in parallel.
-- **Paper- & Stylus-Friendly:** Replaces text fields and dropdowns with write-in lines, and choice inputs with printable ballot boxes (`☐`).
-- **Pre-Print Controls:** Toggle blank answer boxes for clean re-attempts, append compact scratchpad areas, or enable **1 problem per page** mode (placing each problem on its own full PDF page with a scratchpad stretching all the way to the bottom).
-- **Bilingual Support:** Handles mixed Hebrew text (RTL) and mathematical formulas (LTR) with proper alignment.
-- **Zero Dependencies:** Pure JavaScript bookmarklet requiring no extensions, CLI tools, or external installs.
+## Installation & Usage
 
+### 1. Desktop (Windows, macOS, Linux — Chrome, Firefox, Safari, Edge)
 
-## Setup
+1. Open [`snippet.txt`](./snippet.txt) and copy the single-line `javascript:(function...` code.
+2. Right-click your browser's **Bookmarks Bar** and select **Add Page...** or **Add Bookmark...**.
+3. Set the **Name** to `WeBWorK to PDF`.
+4. Paste the copied code into the **URL / Address** field and save.
+5. **To use**: Open your homework set on `webwork.technion.ac.il`, click **WeBWorK to PDF** on your Bookmarks Bar, adjust your layout options, and click **Print / Save PDF**.
 
-1. Copy the single-line code from [**`snippet.txt`**](snippet.txt) (or the minified section of [**`technion_webwork_pdf_bookmarklet.js`**](technion_webwork_pdf_bookmarklet.js)).
-2. Create a new bookmark in your browser:
-   - **Name:** `WeBWorK to PDF`
-   - **URL / Location:** Paste the copied code.
+---
 
-*(Tip: In desktop Chrome or Firefox, right-click your bookmarks bar and click **Add Bookmark...** or **Add page...**).*
+### 2. Tablets (Samsung Galaxy Tab & iPad)
 
-## How to Use
+> **Browser Compatibility Note**: Use **Chrome** (on Android or iPad) or **Safari** (on iPad). *Firefox on iPadOS is not supported because Mozilla disables bookmarklet execution on iOS/iPadOS.*
 
-### Desktop
+#### Option A: Chrome on Samsung Tab or iPad (Lowest Friction via Chrome Sync)
+1. Install the bookmarklet on your **PC in Google Chrome** first (using the Desktop steps above) with **Chrome Sync** enabled—the tiny loader bookmark will automatically sync to your tablet.
+   *(If adding manually on the tablet instead: bookmark any page, tap **Edit**, set Name to `WeBWorK to PDF`, paste the code from [`snippet.txt`](./snippet.txt) into the URL field, and ensure the leading `javascript:` prefix was not stripped by your keyboard).*
+2. Open your WeBWorK homework set on `webwork.technion.ac.il`.
+3. **To launch**:
+   - **iPad + Chrome**: Open **Bookmarks** (or type `WeBWorK to PDF` in the Address Bar) and tap the bookmark.
+   - **Samsung Tab + Chrome**: Tap the **Address Bar**, type `WeBWorK to PDF`, and tap the matching suggestion with the **Star icon** (do not press Enter/Search on the keyboard).
+4. Tap **Print / Save PDF** to save as PDF or share directly into **GoodNotes**, **Notability**, or **Samsung Notes**.
 
-1. Log in to WeBWorK via Moodle and open your homework set (or any problem page).
-2. Click the **WeBWorK to PDF** bookmark.
-3. Wait 1–2 seconds for problems to load.
-4. *(Optional)* Toggle **Blank answer boxes**, **Add scratchpad space**, or **1 problem per page**.
-5. Click **Print / Save PDF** (destination: **Save as PDF**).
-6. Click **Back to WeBWorK** when finished.
+#### Option B: Safari on iPad
+1. Enable Safari's Favorites Bar (**Settings → Safari → Show Favorites Bar**).
+2. Copy the single-line code from [`snippet.txt`](./snippet.txt).
+3. In Safari, add a bookmark for any webpage into your **Favorites**, then open the **Bookmarks sidebar → Edit**, select that bookmark, rename it to `WeBWorK to PDF`, replace its URL with the copied code, and tap **Done**.
+4. **To launch**: Open your WeBWorK homework set and tap **WeBWorK to PDF** directly on your **Favorites Bar** (or inside the Bookmarks menu). *Do not launch via the Safari Address Bar, as Safari blocks scripts triggered from the search field.*
 
-### Mobile & iPad (GoodNotes / Notability)
+---
 
-- **Launch via Address Bar:** Open your WeBWorK set, tap your browser's **Address Bar**, type `WeBWorK to PDF`, and tap the matching bookmark from the suggestions list.
-- **Save to Tablet Note Apps (iPad):**
-  1. Tap **Print / Save PDF** on the generated worksheet.
-  2. On the iOS print preview, **pinch outward** with two fingers to generate a true PDF.
-  3. Tap **Share** and send directly to **GoodNotes**, **Notability**, or **Files**.
+## Repository Structure
 
-## Background & Motivation
+| File | Description |
+| :--- | :--- |
+| **`snippet.txt`** | Lightweight, pure-ASCII `javascript:` loader URI ready to paste directly into a browser bookmark. |
+| **`technion_webwork_pdf_bookmarklet.js`** | Full readable and commented source code served dynamically when the bookmarklet runs. |
 
-Technion WeBWorK disables the built-in Hardcopy PDF generator for students, while Moodle LTI authentication prevents external scrapers from accessing problem sets. 
+---
 
-This bookmarklet runs directly inside your active, authenticated browser tab to fetch and compile all problems into a clean, formatted worksheet with full MathJax rendering—in one click.
+## How It Works
 
-## How It Works Under the Hood
+1. **Link Discovery**: Scans the page for URLs matching the current course and homework set path (`/webwork2/<course>/<set>/<problem>`), ignoring 6-digit Technion course numbers in breadcrumb navigation. If triggered inside a Moodle LTI `<iframe>` wrapper, it automatically navigates to the direct WeBWorK frame first.
+2. **Parallel Fetching**: Requests all problem pages concurrently via `fetch(..., { credentials: 'include' })` and parses them with `DOMParser`.
+3. **DOM Cleaning**: Extracts `.problem-content` / `#problem_body`, strips navigation and submission buttons, resolves relative image URLs, and normalizes `<script type="math/tex">` nodes.
+4. **MathJax Typesetting**: Invokes the page's local MathJax engine (or injects the course's MathJax config) to render all equations before printing.
 
-1. **Link Discovery:** Scans the active set page for problem URLs matching `/webwork2/<course>/<set>/<problem>`.
-2. **Parallel Fetching:** Downloads all problem pages concurrently via authenticated `fetch()` and parses them into DOM trees.
-3. **DOM Cleaning:** Strips interactive buttons and hidden forms, rewrites relative image paths, and converts input fields into printable lines and checkboxes.
-4. **MathJax Typesetting:** Invokes the page's local MathJax engine (or injects the course's MathJax config) to render all equations before printing.
-
-## Troubleshooting
-
-| Issue | Cause | Solution |
-| :--- | :--- | :--- |
-| *"Please open a Homework Set page..."* alert | Bookmarklet clicked outside of a homework set. | Navigate into a specific homework set (`/webwork2/...`) and try again. |
-| Mobile Chrome opens a search page | Bookmark clicked from the `⋮` menu instead of address bar. | Type the bookmark name into the address bar and select the suggestion. |
-| Formulas appear as raw LaTeX | Print was triggered before MathJax finished rendering. | Wait for the status indicator to read `Ready (... problems loaded)`. |
-| Blank cards / session expired | WeBWorK session timed out. | Re-open WeBWorK from Moodle to refresh your session, then rerun. |
+---
 
 ## Customization
 
-To edit the bookmarklet:
-1. Modify the readable source code in Section 2 of [**`technion_webwork_pdf_bookmarklet.js`**](technion_webwork_pdf_bookmarklet.js).
-2. When minifying back into a single-line `javascript:` URI, avoid `#` and `%` characters (use `rgb(...)` colors, `[id="..."]`, and `px`/`em`/`rem` units) to ensure cross-browser compatibility.
+To customize the worksheet layout or styling, edit [`technion_webwork_pdf_bookmarklet.js`](./technion_webwork_pdf_bookmarklet.js) and commit your changes to `main`. Because `snippet.txt` dynamically loads the script from this repository, existing bookmarks will receive updates automatically without needing to be reinstalled.
