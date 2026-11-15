@@ -9,8 +9,9 @@
  *  - Works from either a Homework Set Overview page or any individual Problem page
  *  - Filters out 6-digit Technion course codes in breadcrumbs by verifying set path prefix
  *  - Reuses your active Moodle LTI / WeBWorK session key automatically
- *  - Fetches all problems in parallel and extracts problem statements & plots
- *  - Converts <input>, <select>, and radio/checkboxes into clean write-in boxes
+ *  - Fetches all problems in parallel (with showOldAnswers=1) and extracts statements & plots
+ *  - Converts <input>, MathQuill fields, <select>, and radio/checkboxes into write-in boxes
+ *  - Non-destructively toggles between blank answer boxes and saved student answers
  *  - Bulletproof MathJax v2 & v3 rendering (supports script[type="math/tex"] and \(...\))
  *  - Zero #, %, or \ characters in URI (immune to Safari NSURL & iCloud Sync mangling)
  *  - Fixes Firefox & Safari multi-page print pagination & Hebrew/English BiDi alignment
@@ -29,7 +30,8 @@
   }
 
   var BS = String.fromCharCode(92);
-  var BALLOT_BOX = String.fromCharCode(9744) + ' ';
+  var BALLOT_EMPTY = String.fromCharCode(9744) + ' ';
+  var BALLOT_CHECKED = String.fromCharCode(9745) + ' ';
 
   /* 1. Discover problem URLs belonging to the current Homework Set */
   function findProblemLinks() {
@@ -92,7 +94,7 @@
     }
   }
 
-  /* 2. Inject cross-browser screen & print CSS (Safari/Firefox-safe block layout, zero #, %, or \ symbols) */
+  /* 2. Inject cross-browser screen & print CSS (Safari/Firefox-safe block layout, zero hash, percent, or backslash symbols) */
   var style = document.createElement('style');
   style.id = 'ww-pdf-style';
   style.textContent = [
@@ -116,7 +118,11 @@
     '.ww-pdf-body { font-size: 14px; line-height: 1.6; overflow-x: visible; }',
     '.ww-pdf-body img { max-width: 520px; height: auto; display: block; margin: 10px 0; }',
     '.ww-ans-box { display: inline-block; min-width: 120px; min-height: 24px; padding: 2px 8px; margin: 2px 4px; border: 1.5px solid rgb(71, 85, 105); border-radius: 4px; background: rgb(248, 250, 252); vertical-align: middle; font-family: ui-monospace, monospace; font-size: 13px; direction: ltr; text-align: left; }',
-    '.ww-hide-saved .ww-ans-text { visibility: hidden; }',
+    '.ww-ans-choice { display: inline-block; vertical-align: middle; line-height: 1; }',
+    '.ww-ans-blank-prompt { display: none !important; }',
+    '.ww-ans-text { display: inline !important; }',
+    '.ww-hide-saved .ww-ans-text { display: none !important; }',
+    '.ww-hide-saved .ww-ans-blank-prompt { display: inline !important; }',
     '.ww-scratchpad { display: none; margin-top: 14px; height: 110px; border: 1px dashed rgb(148, 163, 184); border-radius: 6px; padding: 6px 10px; font-size: 11px; color: rgb(148, 163, 184); direction: ltr; }',
     '.ww-show-scratch .ww-scratchpad { display: block; }',
     '.ww-one-per-page .ww-pdf-card { display: flex; flex-direction: column; box-sizing: border-box; width: auto; height: auto; min-height: 0; aspect-ratio: 100 / 140; }',
@@ -154,7 +160,7 @@
     '<div class="ww-pdf-toolbar">',
     '  <div class="ww-pdf-toolbar-title" id="ww-pdf-status">Fetching ' + links.length + ' problems...</div>',
     '  <div class="ww-pdf-controls">',
-    '    <label><input type="checkbox" id="ww-chk-blank" checked> Blank answer boxes</label>',
+    '    <label><input type="checkbox" id="ww-chk-blank" checked> Fill answer boxes</label>',
     '    <label><input type="checkbox" id="ww-chk-scratch"> Add scratchpad space</label>',
     '    <label><input type="checkbox" id="ww-chk-onepage"> 1 problem per page</label>',
     '    <button class="ww-pdf-btn ww-pdf-btn-primary" id="ww-btn-print">Print / Save PDF</button>',
@@ -214,17 +220,29 @@
     if (!container) return null;
     var clone = document.importNode(container, true);
 
+    /* Remove buttons, feedback panels, and attempt result tables (keep hidden inputs until answers are read) */
     var junkSelectors = [
       'input[type="submit"]',
       'input[type="button"]',
-      'input[type="hidden"]',
       'button',
       '.submit-buttons-container',
       '.problem-Batteries',
       '.showMeAnotherBox',
       '.AuthorComment',
       '.pg-editor-link',
-      '.MathJax_Preview'
+      '.MathJax_Preview',
+      '.attemptResults',
+      '.attemptResultsSummary',
+      '[id="attemptResults"]',
+      '.resultsSummary',
+      '.problem-feedback',
+      '.feedback',
+      '.answerComments',
+      '[id="answerComment"]',
+      '.alert',
+      '.gwIncorrectAnswer',
+      '.gwCorrectAnswer',
+      '.ans-message'
     ];
     clone.querySelectorAll(junkSelectors.join(',')).forEach(function (el) {
       el.remove();
@@ -248,10 +266,41 @@
       } catch (e) {}
     });
 
+    /* Helper: resolve saved answer from an input, its attributes, or paired MaThQuIlL hidden input */
+    function resolveAnswerVal(el) {
+      var val = el.value || el.getAttribute('value') || '';
+      var name = el.getAttribute('name') || el.id || '';
+      if (!val && name) {
+        var mqHidden = clone.querySelector('input[name="MaThQuIlL_' + name + '"], input[id="MaThQuIlL_' + name + '"]');
+        if (mqHidden) {
+          val = mqHidden.value || mqHidden.getAttribute('value') || '';
+        }
+      }
+      return val;
+    }
+
+    /* Process MathQuill editable fields (if already rendered on the live page) */
+    clone.querySelectorAll('.mq-editable-field').forEach(function (mq) {
+      var inp = mq.querySelector('input');
+      var val = inp ? resolveAnswerVal(inp) : '';
+      if (!val) {
+        var rootBlock = mq.querySelector('.mq-root-block');
+        if (rootBlock) val = (rootBlock.textContent || '').trim();
+      }
+      var box = document.createElement('span');
+      box.className = 'ww-ans-box';
+      var inner = document.createElement('span');
+      inner.className = 'ww-ans-text';
+      inner.textContent = val;
+      box.appendChild(inner);
+      mq.replaceWith(box);
+    });
+
+    /* Process standard text/number inputs & textareas */
     clone.querySelectorAll('input[type="text"], input[type="number"], input:not([type]), textarea').forEach(function (inp) {
       var box = document.createElement('span');
       box.className = 'ww-ans-box';
-      var val = inp.value || inp.getAttribute('value') || '';
+      var val = resolveAnswerVal(inp);
       var inner = document.createElement('span');
       inner.className = 'ww-ans-text';
       inner.textContent = val;
@@ -259,21 +308,54 @@
       inp.replaceWith(box);
     });
 
-    clone.querySelectorAll('select').forEach(function (sel) {
-      var opts = Array.from(sel.querySelectorAll('option'))
-        .map(function (o) { return (o.textContent || '').trim(); })
-        .filter(function (t) { return t && t !== '?'; });
-      var span = document.createElement('span');
-      span.className = 'ww-ans-box';
-      span.textContent = '[ ' + (opts.join(' / ') || 'Select') + ' ]';
-      sel.replaceWith(span);
+    /* Now safe to remove remaining hidden inputs and codeshard elements */
+    clone.querySelectorAll('input[type="hidden"], .codeshard').forEach(function (el) {
+      el.remove();
     });
 
+    /* Process dropdown select boxes */
+    clone.querySelectorAll('select').forEach(function (sel) {
+      var selectedText = '';
+      var allOpts = [];
+      Array.from(sel.querySelectorAll('option')).forEach(function (opt) {
+        var txt = (opt.textContent || '').trim();
+        if (!txt || txt === '?') return;
+        allOpts.push(txt);
+        if (opt.selected || opt.hasAttribute('selected')) {
+          selectedText = txt;
+        }
+      });
+      var box = document.createElement('span');
+      box.className = 'ww-ans-box';
+      var blankPrompt = document.createElement('span');
+      blankPrompt.className = 'ww-ans-blank-prompt';
+      blankPrompt.textContent = '[ ' + (allOpts.join(' / ') || 'Select') + ' ]';
+      box.appendChild(blankPrompt);
+      var savedText = document.createElement('span');
+      savedText.className = 'ww-ans-text';
+      savedText.textContent = selectedText || blankPrompt.textContent;
+      box.appendChild(savedText);
+      sel.replaceWith(box);
+    });
+
+    /* Process radio buttons and checkboxes */
     clone.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(function (rc) {
-      var sym = document.createElement('span');
-      sym.textContent = BALLOT_BOX;
-      sym.style.fontSize = '16px';
-      rc.replaceWith(sym);
+      var isChecked = rc.checked || rc.hasAttribute('checked');
+      var wrap = document.createElement('span');
+      wrap.className = 'ww-ans-choice';
+      wrap.style.fontSize = '16px';
+
+      var blankSym = document.createElement('span');
+      blankSym.className = 'ww-ans-blank-prompt';
+      blankSym.textContent = BALLOT_EMPTY;
+
+      var savedSym = document.createElement('span');
+      savedSym.className = 'ww-ans-text';
+      savedSym.textContent = isChecked ? BALLOT_CHECKED : BALLOT_EMPTY;
+
+      wrap.appendChild(blankSym);
+      wrap.appendChild(savedSym);
+      rc.replaceWith(wrap);
     });
 
     clone.querySelectorAll('p, div, td, li').forEach(function (p) {
@@ -394,14 +476,20 @@
     }, 100);
   }
 
-  /* 6. Fetch all problems in parallel and render cards */
+  /* 6. Fetch all problems in parallel (requesting old answers) and render cards */
   var listEl = document.getElementById('ww-pdf-list');
   var statusEl = document.getElementById('ww-pdf-status');
   var firstParsedDoc = null;
 
   Promise.all(
     links.map(function (item) {
-      return fetch(item.url, { credentials: 'include' })
+      var fetchUrl = item.url;
+      try {
+        var u = new URL(item.url, window.location.href);
+        u.searchParams.set('showOldAnswers', '1');
+        fetchUrl = u.href;
+      } catch (e) {}
+      return fetch(fetchUrl, { credentials: 'include' })
         .then(function (res) { return res.text(); })
         .then(function (html) {
           var parser = new DOMParser();
