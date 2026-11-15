@@ -23,7 +23,7 @@ Supports bilingual (Hebrew/English) courses, dynamic MathJax rendering, and mult
 
 ### 1. Desktop (Windows, macOS, Linux — Chrome, Firefox, Safari, Edge)
 
-1. Open [`snippet.txt`](./snippet.txt) and copy the single-line `javascript:(function...` code.
+1. Open [`snippet.txt`](./snippet.txt) and copy the single-line `javascript:(()=>{...` code.
 2. Right-click your browser's **Bookmarks Bar** and select **Add Page...** or **Add Bookmark...**.
 3. Set the **Name** to `WeBWorK to PDF`.
 4. Paste the copied code into the **URL / Address** field and save.
@@ -31,22 +31,23 @@ Supports bilingual (Hebrew/English) courses, dynamic MathJax rendering, and mult
 
 ---
 
-### 2. Tablets (Samsung Galaxy Tab & iPad)
+### 2. Tablets (iPad & Samsung Galaxy Tab)
 
-> **Browser Compatibility Note**: Use **Chrome** (on Android or iPad) or **Safari** (on iPad). *Firefox on iPadOS is not supported because Mozilla disables bookmarklet execution on iOS/iPadOS.*
+> **Browser Compatibility Note**: Use **Chrome** or **Safari** on iPad, or **Chrome** on Android tablets. *Firefox on iPadOS is not supported because Mozilla disables bookmarklet execution on iOS/iPadOS.*
 
-#### Option A: Chrome on Samsung Tab or iPad (Lowest Friction via Chrome Sync)
-1. Install the bookmarklet on your **PC in Google Chrome** first (using the Desktop steps above) with **Chrome Sync** enabled—the tiny loader bookmark will automatically sync to your tablet.
-   *(If adding manually on the tablet instead: bookmark any page, tap **Edit**, set Name to `WeBWorK to PDF`, paste the code from [`snippet.txt`](./snippet.txt) into the URL field, and ensure the leading `javascript:` prefix was not stripped by your keyboard).*
-2. Open your WeBWorK homework set on `webwork.technion.ac.il`.
-3. **To launch**:
+#### Option A: Chrome on iPad or Samsung Tab
+1. Open [`snippet.txt`](./snippet.txt) on your tablet and tap the **Copy raw file** button.
+2. In Chrome, bookmark any webpage, tap **Edit**, and set the **Name** to `WeBWorK to PDF`.
+3. Clear the **URL** field, paste the copied code, and **verify that `javascript:` is still at the very beginning of the URL** (Android keyboards/Chrome sometimes strip the `javascript:` prefix on paste—if missing, type `javascript:` at the start).
+4. Open your WeBWorK homework set on `webwork.technion.ac.il`.
+5. **To launch**:
    - **iPad + Chrome**: Open **Bookmarks** (or type `WeBWorK to PDF` in the Address Bar) and tap the bookmark.
    - **Samsung Tab + Chrome**: Tap the **Address Bar**, type `WeBWorK to PDF`, and tap the matching suggestion with the **Star icon** (do not press Enter/Search on the keyboard).
-4. Tap **Print / Save PDF** to save as PDF or share directly into **GoodNotes**, **Notability**, or **Samsung Notes**.
+6. Tap **Print / Save PDF** to save as PDF or share directly into **GoodNotes**, **Notability**, or **Samsung Notes**.
 
 #### Option B: Safari on iPad
 1. Enable Safari's Favorites Bar (**Settings → Safari → Show Favorites Bar**).
-2. Copy the single-line code from [`snippet.txt`](./snippet.txt).
+2. Open [`snippet.txt`](./snippet.txt) and tap the **Copy raw file** button.
 3. In Safari, add a bookmark for any webpage into your **Favorites**, then open the **Bookmarks sidebar → Edit**, select that bookmark, rename it to `WeBWorK to PDF`, replace its URL with the copied code, and tap **Done**.
 4. **To launch**: Open your WeBWorK homework set and tap **WeBWorK to PDF** directly on your **Favorites Bar** (or inside the Bookmarks menu). *Do not launch via the Safari Address Bar, as Safari blocks scripts triggered from the search field.*
 
@@ -56,8 +57,8 @@ Supports bilingual (Hebrew/English) courses, dynamic MathJax rendering, and mult
 
 | File | Description |
 | :--- | :--- |
-| **`snippet.txt`** | Lightweight, pure-ASCII `javascript:` loader URI ready to paste directly into a browser bookmark. |
-| **`technion_webwork_pdf_bookmarklet.js`** | Full readable and commented source code served dynamically when the bookmarklet runs. |
+| **`snippet.txt`** | Self-contained, minified single-line `javascript:` URI ready to paste directly into a browser bookmark. |
+| **`technion_webwork_pdf_bookmarklet.js`** | Full readable and commented source code for reference and customization. |
 
 ---
 
@@ -72,4 +73,6 @@ Supports bilingual (Hebrew/English) courses, dynamic MathJax rendering, and mult
 
 ## Customization
 
-To customize the worksheet layout or styling, edit [`technion_webwork_pdf_bookmarklet.js`](./technion_webwork_pdf_bookmarklet.js) and commit your changes to `main`. Because `snippet.txt` dynamically loads the script from this repository, existing bookmarks will receive updates automatically without needing to be reinstalled.
+1. Modify the readable source code in [`technion_webwork_pdf_bookmarklet.js`](./technion_webwork_pdf_bookmarklet.js).
+2. Because `webwork.technion.ac.il` enforces a strict Content Security Policy (`script-src 'self'`), the bookmarklet in `snippet.txt` must remain self-contained rather than loading external scripts.
+3. When minifying back into a single-line `javascript:` URI for `snippet.txt`, avoid `#`, `%`, and `\` characters (use `rgb(...)` colors, `[id="..."]`, and `String.fromCharCode(...)`) to ensure cross-browser compatibility.
