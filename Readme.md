@@ -4,6 +4,10 @@ A client-side bookmarklet that compiles an entire Technion WeBWorK homework set 
 
 Supports bilingual (Hebrew/English) courses, dynamic MathJax rendering, and multi-page print layouts across Chrome, Firefox, and Safari on PC and tablets.
 
+| Before | After |
+| :---: | :---: |
+| <img src="before.png" alt="Before - Hardcopy PDF Blocked" height="300"> | <img src="after.png" alt="After - Generated Printable Worksheet" height="300"> |
+
 ---
 
 ## Features
